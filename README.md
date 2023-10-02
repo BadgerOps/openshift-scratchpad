@@ -11,3 +11,5 @@ Example:
 ```bash
 butane butane-master-ntp.bu -o manifests/98-master-chrony.yaml
 ``````
+
+Full butane spec supporting openshift 4.12.x available here: https://coreos.github.io/butane/config-openshift-v4_12/
