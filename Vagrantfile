@@ -1,8 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-Vagrant.require_version ">= 1.8.0"
+Vagrant.require_version ">= 2.3.0"
+#TODO: this is a very old vagrant file from my salt series several years ago, needs some TLC...
 
-ANSIBLE_VERSION = ENV['ANSIBLE_VERSION'] || '3000.3'
+#ANSIBLE_VERSION = ENV['ANSIBLE_VERSION'] || '3000.3'
 
 # Supported distributions/versions
 
@@ -56,11 +57,7 @@ LINUX_BOX_RAM = ENV['LINUX_BOX_RAM'] || '512'
 
 
 LINUX_SCRIPT = <<EOF
-test -f /etc/sysconfig/network-scripts/ifcfg-enp0s8 && ifup enp0s8
-if [[ $(hostname -s) == 'primary' ]]; then
-  mkdir -p /etc/salt
-  echo -e 'roles:\n  - salt_master' > /etc/salt/grains
-fi
+echo 'nothing here right now'
 EOF
 
 Vagrant.configure('2') do |config|
@@ -83,8 +80,8 @@ Vagrant.configure('2') do |config|
  primary.vm.hostname = 'primary'
  primary.vm.network 'private_network', ip: '192.168.56.4'
  primary.vm.synced_folder './dist', '/srv'
- primary.vm.provision 'shell', inline: LINUX_SCRIPT
- primary.vm.provision "ansible" do |ansible|
+ #primary.vm.provision 'shell', inline: LINUX_SCRIPT
+ primary.vm.provision "ansible_local" do |ansible|
   ansible.verbose = "v"
   ansible.playbook = "playbook.yml"
  end
@@ -99,7 +96,7 @@ Vagrant.configure('2') do |config|
  linux.vm.hostname = "linux-#{i}"
  linux.vm.box = LINUX_BOX
  linux.vm.network 'private_network', ip: "192.168.56.#{i+4}"
- linux.vm.provision 'shell', inline: LINUX_SCRIPT
+ #linux.vm.provision 'shell', inline: LINUX_SCRIPT
  linux.vm.provision "ansible" do |ansible|
   ansible.verbose = "v"
   ansible.playbook = "playbook.yml"
@@ -109,19 +106,6 @@ Vagrant.configure('2') do |config|
   config.vm.define 'windows', autostart: false do |windows|
  windows.vm.provider "virtualbox" do |v|
    v.linked_clone = true
- end
- windows.vm.box = WINDOWS_BOX
- windows.vm.hostname = 'windows'
- windows.vm.communicator = 'winrm'
- windows.winrm.username = 'Administrator'
- windows.winrm.password = 'vagrant'
- windows.vm.network 'private_network', ip: '192.168.56.6'
- windows.vm.network 'forwarded_port', host: 33389, guest: 3389
- windows.vm.provision :salt do |salt|
-   salt.minion_config = 'config/minion'
-   salt.masterless = false
-   salt.run_highstate = true
-   salt.version = ANSIBLE_VERSION
  end
 end
 end
