@@ -2,9 +2,16 @@
 - hosts: all
   become: yes
   tasks:
-    - name: Create the foo file with rw-r--r-- permissions
+    - name: Create the foo file with 'bar' contents
+      ansible.builtin.copy:
+        dest: /etc/foo.conf
+        content: |
+          Bar
+
+    - name: Set ownership/permissions the foo file with rw-r--r-- permissions
       ansible.builtin.file:
         path: /etc/foo.conf
-        owner: foo
-        group: foo
+        state: file
+        owner: root
+        group: wheel
         mode: '0644'
