@@ -1,0 +1,49 @@
+apiVersion: nmstate.io/v1alpha1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: Linux Bridge and VLAN Configs
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: node01
+  desiredState:
+    interfaces:
+      - name: br1
+        type: linux-bridge
+        state: up
+        ipv4:
+          enabled: true
+          dhcp: false
+        bridge:
+          port:
+            - name: nic1
+            - name: nic2
+      - name: br1.vlan100
+        type: vlan
+        state: up
+        ipv4:
+          enabled: true
+          address:
+            - ip: 192.168.100.1
+              prefix-length: 24
+          gateway: 192.168.100.254
+        vlan:
+          base-iface: br1
+          id: 100
+      - name: br1.vlan200
+        type: vlan
+        state: up
+        ipv4:
+          enabled: true
+          address:
+            - ip: 192.168.200.1
+              prefix-length: 24
+          gateway: 192.168.200.254
+        vlan:
+          base-iface: br1
+          id: 200
+    dns-resolver:
+      config:
+        server:
+          - 192.168.1.1
+        search:
+          - example.com
